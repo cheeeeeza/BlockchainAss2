@@ -1,8 +1,0 @@
-{
-    "node": "D",
-    "records": [
-        {"item_id": "001", "qty": 32, "price": 12, "location": "D"},
-        {"item_id": "002", "qty": 20, "price": 14, "location": "C"},
-        {"item_id": "003", "qty": 22, "price": 16, "location": "B"}
-    ]
-}

@@ -150,8 +150,6 @@ inventory_nodes = {
     ]
 }
 
-
-
 def parse_rec(record_string):
     """
     Converting  a record string into a proper structure of  inventory record.
@@ -168,9 +166,6 @@ def parse_rec(record_string):
         "price": int(parts[2]),
         "location": parts[3]
     }
-
-
-
 
 def validate_rec(record_string):
     """
@@ -204,7 +199,7 @@ def validate_rec(record_string):
 
 def duplicate(record_dic, node_database):
     """
-     verify if  whether the submitted item_id already exists
+    verify if  whether the submitted item_id already exists
     inside one of the inventory node local database.
     """
     for existing_record in node_database:
