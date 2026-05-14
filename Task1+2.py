@@ -332,8 +332,6 @@ run_consensus(new_record, signature, A_e, A_n)
 
 # this is an back up rejection test for Task 2.
 
-
-
 # This proves that a tampered record is rejected by consensus.
 print("========== TASK 2: TAMPERED RECORD TESTING ========")
 tampered_record = "004,99,18,A"
