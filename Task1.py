@@ -121,3 +121,231 @@ verifying(invalid_record, signature, A_e, A_n)
 
 #╰────-·-ˋˏ-༻SIGNING AND VERIFICATION༺-ˎˊ·-────╯
 
+
+#╭────-·-ˋˏ-༻TASK 2: CONSENSUS PROTOCOL INTEGRATION༺-ˎˊ·-────╮
+
+# Each of all the inventory node is are represented  as separate local database.
+# it will  simulate the four distributed inventory all the four nodes inside the whole  program
+
+inventory_nodes = {
+    "Inventory A": [
+        {"item_id": "001", "qty": 32, "price": 12, "location": "D"},
+        {"item_id": "002", "qty": 20, "price": 14, "location": "C"},
+        {"item_id": "003", "qty": 22, "price": 16, "location": "B"}
+    ],
+    "Inventory B": [
+        {"item_id": "001", "qty": 32, "price": 12, "location": "D"},
+        {"item_id": "002", "qty": 20, "price": 14, "location": "C"},
+        {"item_id": "003", "qty": 22, "price": 16, "location": "B"}
+    ],
+    "Inventory C": [
+        {"item_id": "001", "qty": 32, "price": 12, "location": "D"},
+        {"item_id": "002", "qty": 20, "price": 14, "location": "C"},
+        {"item_id": "003", "qty": 22, "price": 16, "location": "B"}
+    ],
+    "Inventory D": [
+        {"item_id": "001", "qty": 32, "price": 12, "location": "D"},
+        {"item_id": "002", "qty": 20, "price": 14, "location": "C"},
+        {"item_id": "003", "qty": 22, "price": 16, "location": "B"}
+    ]
+}
+
+
+
+def parse_rec(record_string):
+    """
+    Converting  a record string into a proper structure of  inventory record.
+    for example:
+    "004,12,18,A"
+    become:
+    {"item_id": "004", "qty": 12, "price": 18, "location": "A"}
+    """
+    parts = record_string.split(",")
+
+    return {
+        "item_id": parts[0],
+        "qty": int(parts[1]),
+        "price": int(parts[2]),
+        "location": parts[3]
+    }
+
+
+
+
+def validate_rec(record_string):
+    """
+    Checking if  whether the submitted record comply with  the required format:
+    item_id, quantity, price, location
+    """
+    parts = record_string.split(",")
+
+    if len(parts) != 4:
+        return False
+
+    item_id = parts[0]
+    qty = parts[1]
+    price = parts[2]
+    location = parts[3]
+
+    if item_id == "":
+        return False
+
+    if not qty.isdigit():
+        return False
+
+    if not price.isdigit():
+        return False
+
+    if location == "":
+        return False
+
+    return True
+
+
+def duplicate(record_dic, node_database):
+    """
+     verify if  whether the submitted item_id already exists
+    inside one of the inventory node local database.
+    """
+    for existing_record in node_database:
+        if existing_record["item_id"] == record_dic["item_id"]:
+            return True
+
+    return False
+
+def run_consensus(record_string, signature, sender_e, sender_n):
+
+    """
+    Using a  simplified BFT-style majority consensus technique .
+
+
+    Rule:
+    Each node must be verifies the submitted signed record.
+    Each node will hav to votes ACCEPT or REJECT.
+    At least 3 out of 4 ACCEPT votes are required in order to pass the consensus .
+    if consensus succeeds, the record is stored in all the  node.
+    If consensus fails, no node will be stores the record.
+    """
+    votes = {}
+    print("\n TASK 2: CONSENSUS PROTOCOL ")
+    print("New submitted record:", record_string)
+    print("Orginated  node: Inventory A")
+    print("Consensus mechanism: The Simplified BFT-style majority voting")
+    print("Rule: 3 out of 4 ACCEPT votes are must be complied in order to succeed and be stored in other nodes")
+    print()
+
+    print("first, Each inventory node verifies the record and votes")
+    print()
+
+
+
+    for node_name, node_database in inventory_nodes.items():
+
+        # signatur verification comes from Task 1.
+        # this is  the  manual RSA verification: check  where = signature^e mod n.
+
+
+        signature_valid = verifying(record_string, signature, sender_e, sender_n)
+        format_valid = validate_rec(record_string)
+
+
+        if format_valid:
+            record_dic = parse_rec(record_string)
+            duplicate_record = duplicate(record_dic, node_database)
+
+        else:
+            record_dic = None
+            duplicate_record = True
+
+
+        # Node vote decision
+        if signature_valid and format_valid and not duplicate_record:
+            votes[node_name] = "ACCEPT"
+        else:
+            votes[node_name] = "REJECT"
+
+        print(node_name)
+
+
+        print("  Signature valid:", signature_valid)
+        print("  Record format valid:", format_valid)
+        print("  Duplicate record:", duplicate_record)
+        print("  Vote:", votes[node_name])
+        print()
+
+    print("Secondly: Counting all consensus votes")
+    print("---------------------------------")
+
+
+
+    accept_count = list(votes.values()).count("ACCEPT")
+    reject_count = list(votes.values()).count("REJECT")
+    print("Accept votes:", accept_count, "/ 4")
+    print("Reject votes:", reject_count, "/ 4")
+    print("the minimum  threshold to pass: 3 / 4")
+    print()
+
+
+
+    print("Step 3: Final consensus decision")
+    print("--------------------------------")
+
+    if accept_count >= 3:
+        final_decision = "ACCEPT"
+    else:
+        final_decision = "REJECT"
+
+    print("Final decision:", final_decision)
+    print()
+
+
+
+    print("Fouth: The Local database update")
+    print("-----------------------------")
+
+    if final_decision == "ACCEPT":
+        accepted_record = parse_rec(record_string)
+        print("Consensus met the required criteria and passed. Storing the record in all inventory nodes.")
+
+        for node_name in inventory_nodes:
+            inventory_nodes[node_name].append(accepted_record.copy())
+            print("Record stored in", node_name)
+
+    else:
+        print("Consensus are not able to meet criteria and FAILED . Record will  not  be stored in any inventory node.")
+
+    print()
+
+
+
+
+    print("Lastly,  -------    Final local database state    ---------")
+    print("----------------------------------")
+
+    for node_name, node_database in inventory_nodes.items():
+        print(node_name, "database:")
+
+        for record in node_database:
+            print("  ", record)
+
+        print()
+
+    return final_decision, votes
+
+# running if  Task 2 using the valid record from Task 1.
+run_consensus(new_record, signature, A_e, A_n)
+
+# this is an back up rejection test for Task 2.
+
+
+
+# This proves that a tampered record is rejected by consensus.
+print("========== TASK 2: TAMPERED RECORD TESTING ========")
+tampered_record = "004,99,18,A"
+
+
+run_consensus(tampered_record, signature, A_e, A_n)
+
+
+
+#╰────-·-ˋˏ-༻TASK 2: CONSENSUS PROTOCOL INTEGRATION༺-ˎˊ·-────╯
