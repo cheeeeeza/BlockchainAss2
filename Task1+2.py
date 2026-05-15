@@ -196,7 +196,6 @@ def validate_rec(record_string):
 
     return True
 
-
 def duplicate(record_dic, node_database):
     """
     verify if  whether the submitted item_id already exists
@@ -232,17 +231,13 @@ def run_consensus(record_string, signature, sender_e, sender_n):
     print("first, Each inventory node verifies the record and votes")
     print()
 
-
-
     for node_name, node_database in inventory_nodes.items():
 
         # signatur verification comes from Task 1.
         # this is  the  manual RSA verification: check  where = signature^e mod n.
 
-
         signature_valid = verifying(record_string, signature, sender_e, sender_n)
         format_valid = validate_rec(record_string)
-
 
         if format_valid:
             record_dic = parse_rec(record_string)
@@ -252,7 +247,6 @@ def run_consensus(record_string, signature, sender_e, sender_n):
             record_dic = None
             duplicate_record = True
 
-
         # Node vote decision
         if signature_valid and format_valid and not duplicate_record:
             votes[node_name] = "ACCEPT"
@@ -260,7 +254,6 @@ def run_consensus(record_string, signature, sender_e, sender_n):
             votes[node_name] = "REJECT"
 
         print(node_name)
-
 
         print("  Signature valid:", signature_valid)
         print("  Record format valid:", format_valid)
@@ -271,16 +264,12 @@ def run_consensus(record_string, signature, sender_e, sender_n):
     print("Secondly: Counting all consensus votes")
     print("---------------------------------")
 
-
-
     accept_count = list(votes.values()).count("ACCEPT")
     reject_count = list(votes.values()).count("REJECT")
     print("Accept votes:", accept_count, "/ 4")
     print("Reject votes:", reject_count, "/ 4")
     print("the minimum  threshold to pass: 3 / 4")
     print()
-
-
 
     print("Step 3: Final consensus decision")
     print("--------------------------------")
@@ -292,8 +281,6 @@ def run_consensus(record_string, signature, sender_e, sender_n):
 
     print("Final decision:", final_decision)
     print()
-
-
 
     print("Fouth: The Local database update")
     print("-----------------------------")
@@ -310,9 +297,6 @@ def run_consensus(record_string, signature, sender_e, sender_n):
         print("Consensus are not able to meet criteria and FAILED . Record will  not  be stored in any inventory node.")
 
     print()
-
-
-
 
     print("Lastly,  -------    Final local database state    ---------")
     print("----------------------------------")
