@@ -240,14 +240,7 @@ def submit_request(user_name, item_id):
 
 import hashlib
 
-#╰────-·-ˋˏ-༻IMPORTS༺-ˎˊ·-────╯
-
-
-#╭────-·-ˋˏ-༻INSERT TITLE༺-ˎˊ·-────╮
-
-
-
-#╰────-·-ˋˏ-༻INSERT TITLE༺-ˎˊ·-────╯
+#╰────-·-ˋˏ-༻IMPORTS༺-ˎˊ·-────╯1
 
 #╭────-·-ˋˏ-༻COMPUTING HASH༺-ˎˊ·-────╮
 
