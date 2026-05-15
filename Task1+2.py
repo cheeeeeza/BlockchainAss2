@@ -1,5 +1,11 @@
 #╭────-·-ˋˏ-༻IMPORTS༺-ˎˊ·-────╮
 
+# explantion: this allow the combination of tassk 1 and task 2 combine togeht.
+# task 1 is about rsa digital singaure generation and verification.
+# task 2 use verified signed record as input for the consensus process
+
+
+# the command line interface required input to get desired result and for testing output too and server as the ui for demonstrating workflow. 
 import hashlib
 
 #╰────-·-ˋˏ-༻IMPORTS༺-ˎˊ·-────╯
@@ -27,6 +33,9 @@ C_e = 1158749422015035388438057
 D_p = 1287737200891425621338551020762858710281638317
 D_q = 1330909125725073469794953234151525201084537607
 D_e = 33981230465225879849295979
+
+## explanation the public parameters for inventory nodes.
+
 
 #╰────-·-ˋˏ-༻INITIALISING CRYPTOGRAPHIC PARAMETERS༺-ˎˊ·-────╯
 
@@ -107,22 +116,23 @@ def verifying(record, signature, e, n):
         return False
 
 # Inventory A creates a new record
-new_record = "004,12,18,A"
-signature, m = signing(new_record, A_d, A_n)
+#new_record = input("Enter new inventory record (item_id,qty,price,location Ex:004,12,18,A without any spaces ): ")
+#signature, m = signing(new_record, A_d, A_n)
 
 # verifying new record from Inventory A by using public key given
-print(f"\n₊˚ ✧ ━━━━⊱Testing with VALID record⊰━━━━ ✧ ₊˚")
-verifying(new_record, signature, A_e, A_n)
+#print(f"\n₊˚ ✧ ━━━━⊱Testing with VALID record⊰━━━━ ✧ ₊˚")
+# verifying(new_record, signature, A_e, A_n)
 
 # testing with tamperred record
-print(f"\n₊˚ ✧ ━━━━⊱Testing with INVALID/TAMPERED record⊰━━━━ ✧ ₊˚")
-invalid_record = "004,99,18,A"
-verifying(invalid_record, signature, A_e, A_n)
+#print(f"\n₊˚ ✧ ━━━━⊱Testing with INVALID/TAMPERED record⊰━━━━ ✧ ₊˚")
+#invalid_record = input("Enter invalid/tampered record (item_id,qty,price,location Ex:005,99,18,A without any spaces ):  ")
+#verifying(invalid_record, signature, A_e, A_n)
 
 #╰────-·-ˋˏ-༻SIGNING AND VERIFICATION༺-ˎˊ·-────╯
 
 
-#╭────-·-ˋˏ-༻TASK 2: CONSENSUS PROTOCOL INTEGRATION༺-ˎˊ·-────╮
+
+print("╭────-·-ˋˏ-༻TASK 2: CONSENSUS PROTOCOL INTEGRATION༺-ˎˊ·-────╮")
 
 # Each of all the inventory node is are represented  as separate local database.
 # it will  simulate the four distributed inventory all the four nodes inside the whole  program
@@ -150,6 +160,11 @@ inventory_nodes = {
     ]
 }
 
+
+# explannation : this is ahelper which help convert the submit record string into a strcutured dictorionary
+# for example if user input in: 004,12,18,A
+# the expected output might be : 004, qty,: 12, price : 18, location; A
+# it allows for the input to be stored inside inventory node database. 
 def parse_rec(record_string):
     """
     Converting  a record string into a proper structure of  inventory record.
@@ -167,6 +182,14 @@ def parse_rec(record_string):
         "location": parts[3]
     }
 
+
+
+# explanation: the function of this block is to verify whtehr record follow the correct format
+# the correct format contain all the four field - check below
+
+# quantity and price must be numeric to be valid
+
+# if the format is not correct, node will be reject. 
 def validate_rec(record_string):
     """
     Checking if  whether the submitted record comply with  the required format:
@@ -196,9 +219,15 @@ def validate_rec(record_string):
 
     return True
 
+
+# explanation: this function will help check if the submitte item exist in the node local database. 
+# the duplication check also help prevent the same item_id from being stored twice.
+
+# if dupicate isfound, node will be reject from the submitted record
+
 def duplicate(record_dic, node_database):
     """
-    verify if  whether the submitted item_id already exists
+     verify if  whether the submitted item_id already exists
     inside one of the inventory node local database.
     """
     for existing_record in node_database:
@@ -207,6 +236,13 @@ def duplicate(record_dic, node_database):
 
     return False
 
+
+# this block is the implementation of simplified bft
+# each inventory node will verify the input record , check the recorrd format
+# check for any duplication and decide the vode for accept or reject
+# the record accept if there is at least 3 out of 4 vote accepted
+
+# or rejection if input doeds not meet the requirement and record is only stored aftre the finaal decision is reached. 
 def run_consensus(record_string, signature, sender_e, sender_n):
 
     """
@@ -231,13 +267,17 @@ def run_consensus(record_string, signature, sender_e, sender_n):
     print("first, Each inventory node verifies the record and votes")
     print()
 
+
+
     for node_name, node_database in inventory_nodes.items():
 
         # signatur verification comes from Task 1.
         # this is  the  manual RSA verification: check  where = signature^e mod n.
 
+
         signature_valid = verifying(record_string, signature, sender_e, sender_n)
         format_valid = validate_rec(record_string)
+
 
         if format_valid:
             record_dic = parse_rec(record_string)
@@ -247,6 +287,7 @@ def run_consensus(record_string, signature, sender_e, sender_n):
             record_dic = None
             duplicate_record = True
 
+
         # Node vote decision
         if signature_valid and format_valid and not duplicate_record:
             votes[node_name] = "ACCEPT"
@@ -254,6 +295,7 @@ def run_consensus(record_string, signature, sender_e, sender_n):
             votes[node_name] = "REJECT"
 
         print(node_name)
+
 
         print("  Signature valid:", signature_valid)
         print("  Record format valid:", format_valid)
@@ -264,12 +306,16 @@ def run_consensus(record_string, signature, sender_e, sender_n):
     print("Secondly: Counting all consensus votes")
     print("---------------------------------")
 
+
+
     accept_count = list(votes.values()).count("ACCEPT")
     reject_count = list(votes.values()).count("REJECT")
     print("Accept votes:", accept_count, "/ 4")
     print("Reject votes:", reject_count, "/ 4")
     print("the minimum  threshold to pass: 3 / 4")
     print()
+
+
 
     print("Step 3: Final consensus decision")
     print("--------------------------------")
@@ -281,6 +327,8 @@ def run_consensus(record_string, signature, sender_e, sender_n):
 
     print("Final decision:", final_decision)
     print()
+
+
 
     print("Fouth: The Local database update")
     print("-----------------------------")
@@ -298,6 +346,9 @@ def run_consensus(record_string, signature, sender_e, sender_n):
 
     print()
 
+
+
+
     print("Lastly,  -------    Final local database state    ---------")
     print("----------------------------------")
 
@@ -312,17 +363,59 @@ def run_consensus(record_string, signature, sender_e, sender_n):
     return final_decision, votes
 
 # running if  Task 2 using the valid record from Task 1.
-run_consensus(new_record, signature, A_e, A_n)
+#run_consensus(new_record, signature, A_e, A_n)
 
 # this is an back up rejection test for Task 2.
 
+
+
 # This proves that a tampered record is rejected by consensus.
-print("========== TASK 2: TAMPERED RECORD TESTING ========")
-tampered_record = "004,99,18,A"
+#print("========== TASK 2: TAMPERED RECORD TESTING ========")
+#tampered_record = "004,99,18,A"
 
 
-run_consensus(tampered_record, signature, A_e, A_n)
+#run_consensus(tampered_record, signature, A_e, A_n)
 
+# this is the loop for the final state of every inventory node after consensus
+# the demonstration the tutor that use to test the record 
+# and if it is stored in the database
+while True:
+    print("\n========== TASK 1&2 MENU for user ==========")
+    print("1 = Submit valid inventory record")
+    print("2 = Submit tampered/invalid inventory record")
+    print("3 = Exit")
 
+    choice = input("Please choose an option based on the menu above: ")
+# this block of code for user input a inventory record
+    if choice == "1":
+        new_record = input("Enter new inventory record (item_id,qty,price,location) without any spaces: ")
+
+        signature, m = signing(new_record, A_d, A_n)
+
+        print("\nTesting valid record signature verification")
+        verifying(new_record, signature, A_e, A_n)
+
+        run_consensus(new_record, signature, A_e, A_n)
+
+# user can type in number 2 so that they can enter or test invalid record 
+    elif choice == "2":
+        original_record = input("Enter original record to sign (item_id,qty,price,location) without any spaces: ")
+
+        signature, m = signing(original_record, A_d, A_n)
+
+        tampered_record = input("Enter tampered/invalid record (item_id,qty,price,location) without any spaces: ")
+
+        print("\nTesting tampered/invalid record signature verification")
+        verifying(tampered_record, signature, A_e, A_n)
+
+        run_consensus(tampered_record, signature, A_e, A_n)
+
+# this block is used wehn user wants to exit the program by typing in number 3
+    elif choice == "3":
+        print("Program ended.")
+        break
+
+    else:
+        print("Invalid option. Please try choosing again 1, 2, or 3.")
 
 #╰────-·-ˋˏ-༻TASK 2: CONSENSUS PROTOCOL INTEGRATION༺-ˎˊ·-────╯
