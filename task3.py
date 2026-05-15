@@ -443,8 +443,44 @@ while True:
 
         query_results = submit_request(user_name, item_id)
 
+        def consistency_check(query_results):
+
+          print("\n₊˚ ✧ ━━━━⊱Checking Query Consistency...⊰━━━━ ✧ ₊˚")
+
+          # retrieving the values
+          values = list(query_results.values())
+
+          # comparing the value with the first value to check if the same
+          first_value = values[0]
+
+          consistent = True
+
+          for value in values:
+            if value != first_value:
+              consistent = False
+
+          if consistent:
+            print("｡ﾟ•┈꒰ა ♡CONSISTENCY ACHIEVED♡ ໒꒱┈•｡ﾟ")
+            print("Inventory nodes returned consistent results!")
+            return True
+
+          else:
+            print("｡ﾟ•┈꒰ა ♡CONSISTENCY FAILED♡ ໒꒱┈•｡ﾟ")
+            print("Inventory nodes returned inconsistent results!")
+            print("Returned values:", query_results)
+            return False
+
         if query_results is not None:
-            multisig_workflow(
+            
+            consistency_check(query_results)
+
+            # check if all inventory nodes returned None
+            if all(value is None for value in query_results.values()):
+              print("\nItem does not exist in the distributed inventory system!")
+              print("Returning to main menu...")
+
+            else:
+              multisig_workflow(
                 query_results,
                 aggregate,
                 inventory_secret,
@@ -456,6 +492,7 @@ while True:
                 PO_n,
                 PO_d
             )
+
 # option 2 exiting the task 3 commind line for the ui interface safely. 
     elif choice == "2":
         print("Exiting Task 3 program.")
